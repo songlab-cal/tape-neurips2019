@@ -3,7 +3,7 @@
 Data, weights, and code for running the TAPE benchmark on a trained protein embedding. We provide a pretraining corpus, five supervised downstream tasks, pretrained language model weights, and benchmarking code.
 
 ## Paper
-Preprint is available at [](). 
+Preprint is available at []().
 
 ## Data
 
@@ -11,9 +11,9 @@ The data for training is hosted on AWS. All data are provided as TFRecords - see
 
 [Pretraining Corpus (Pfam)](http://s3.amazonaws.com/proteindata/data/pfam.tar.gz) __|__ [Secondary Structure](http://s3.amazonaws.com/proteindata/data/secondary_structure.tar.gz) __|__ [Contact (ProteinNet)](http://s3.amazonaws.com/proteindata/data/proteinnet.tar.gz) __|__ [Remote Homology](http://s3.amazonaws.com/proteindata/data/remote_homology.tar.gz) __|__ [Fluorescence](http://s3.amazonaws.com/proteindata/data/fluorescence.tar.gz) __|__ [Stability](http://s3.amazonaws.com/proteindata/data/stability.tar.gz)
 
-The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed. The supervised data is around 120MB compressed and 900 MB uncompressed. Data should be placed in the `tape/data` folder, although you may also specify a different data directory if you wish. 
+The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed. The supervised data is around 120MB compressed and 900 MB uncompressed. Data should be placed in the `tape/data` folder, although you may also specify a different data directory if you wish.
 
-## Pretrained Models 
+## Pretrained Models
 
 We provide weights for all models pretrained as detailed in the paper. Each set of weights comes in an `h5` file and is roughly 100 MB. If you wish to download all models, run `download_pretrained_models.sh` to do so. We also provide links to each individual model's weights below:
 
@@ -23,26 +23,21 @@ UniRep is described in [Alley et al](https://www.biorxiv.org/content/10.1101/589
 
 ## Code Setup
 
-TAPE has a number of dependencies, which you should be able to install via `pip install -r requirements.txt`.
+We recommend that you install `tape` into a python [virtual environment](https://virtualenv.pypa.io/en/latest/) using
 
-Additionally, it depends on `rinokeras`, a library of Keras models. Currently we depend on the `develop` branch. You can download this via
-
-    git clone https://github.com/CannyLab/rinokeras
-    cd rinokeras
-    git checkout develop
-    pip install -e .
+`pip install -e .`
 
 ## Usage
 
-TAPE uses [Sacred](https://sacred.readthedocs.io/en/latest/index.html) to configure and store logging information. 
+`tape` uses [Sacred](https://sacred.readthedocs.io/en/latest/index.html) to configure and store logging information.
 
 Sacred options are specified by running `python -m tape with <args>`. For example, to run the `transformer` model on the `masked_language_modeling` task, simply run
 
     python -m tape with model=transformer tasks=masked_language_modeling
-    
+
 Additional arguments can be specified by adding e.g. `transformer.n_layers=6`, `training.learning_rate=1e-4`, `gpu.device=0,1,2`, etc.
 
-Global arguments are defined under `@tape.config` in `tape/__main__.py`. Model specific arguments (e.g. `transformer.n_layers`) can be found in the corresponding model file (`tape/models/Transformer.py`). 
+Global arguments are defined under `@tape.config` in `tape/__main__.py`. Model specific arguments (e.g. `transformer.n_layers`) can be found in the corresponding model file (`tape/models/Transformer.py`).
 
 ### List of Models and Tasks
 
@@ -149,7 +144,7 @@ In the meantime, here's a temporary leaderboard for each task. All reported mode
 
 ## Citation Guidelines
 
-If you find TAPE useful, please cite our corresponding paper. Additionally, __anyone using the datasets provided in TAPE must describe and cite all dataset components they use__. Producing these data is time and resource intensive, and we insist this be recognized by all TAPE users! For convenience,`data_refs.bib` contains all necessary citations. We also provide each individual citation below. 
+If you find TAPE useful, please cite our corresponding paper. Additionally, __anyone using the datasets provided in TAPE must describe and cite all dataset components they use__. Producing these data is time and resource intensive, and we insist this be recognized by all TAPE users. For convenience,`data_refs.bib` contains all necessary citations. We also provide each individual citation below.
 
 __Pfam (Pretraining):__
 ```
