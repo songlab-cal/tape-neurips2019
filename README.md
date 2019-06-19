@@ -152,6 +152,7 @@ __TAPE (Our paper):__
 author = {Rao, Roshan and Bhattacharya, Nicholas and Thomas, Neil and Duan, Yan and Chen, Xi and Canny, John and Abbeel, Pieter and Song, Yun S},
 title = {Evaluating Protein Transfer Learning with TAPE},
 year = {2019}
+}
 ```
 
 __Pfam (Pretraining):__
