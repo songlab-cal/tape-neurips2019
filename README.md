@@ -146,6 +146,14 @@ In the meantime, here's a temporary leaderboard for each task. All reported mode
 
 If you find TAPE useful, please cite our corresponding paper. Additionally, __anyone using the datasets provided in TAPE must describe and cite all dataset components they use__. Producing these data is time and resource intensive, and we insist this be recognized by all TAPE users. For convenience,`data_refs.bib` contains all necessary citations. We also provide each individual citation below.
 
+__TAPE (Our paper):__
+```
+@article{
+author = {Rao, Roshan and Bhattacharya, Nicholas and Thomas, Neil and Duan, Yan and Chen, Xi and Canny, John and Abbeel, Pieter and Song, Yun S},
+title = {Evaluating Protein Transfer Learning with TAPE},
+year = {2019}
+```
+
 __Pfam (Pretraining):__
 ```
 @article{
