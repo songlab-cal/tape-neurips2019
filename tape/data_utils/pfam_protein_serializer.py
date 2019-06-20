@@ -1,16 +1,19 @@
 from typing import Dict, Optional, Tuple
 
 import string
+import pickle as pkl
+import random
+from functools import partial
+from multiprocessing import Pool
+
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 import tensorflow as tf
 from tqdm import tqdm
-from Bio import SeqIO
 import pandas as pd
-from Bio.SeqRecord import SeqRecord
-
-import pickle as pkl
-
 
 from .tf_data_utils import to_features, to_sequence_features
+from .vocabs import PFAM_VOCAB
 
 """
 Inputs
@@ -25,6 +28,7 @@ Metadata
     clan: Higher-level label provided for some protein domains in Pfam.
 """
 
+
 def form_clan_fam_map(clan_fam_file: str) -> Dict[str, str]:
     data = pd.read_csv(clan_fam_file, sep='\t', na_values='\t')
     data = data.fillna('no_clan')  # Replace nans with simple string
@@ -33,12 +37,12 @@ def form_clan_fam_map(clan_fam_file: str) -> Dict[str, str]:
     return dict(zip(families, clans))
 
 
-def parse_line(record: SeqRecord, fam_clan_dict: Dict[str, str]) -> Tuple[str, str, str]:
+def parse_line(record: SeqRecord, fam_to_clan_dict: Dict[str, str]) -> Tuple[str, str, str]:
     seq = record.seq
     family = record.description.split(' ')[2].split('.')[0]  # Yeah, it's ugly
 
     # Some families don't even show up?
-    clan = fam_clan_dict.get(family)
+    clan = fam_to_clan_dict.get(family)
     if clan is None:
         clan = 'no_clan'
 
@@ -47,7 +51,10 @@ def parse_line(record: SeqRecord, fam_clan_dict: Dict[str, str]) -> Tuple[str, s
 
 def convert_pfam_sequences_to_tfrecords(filename: str,
                                         outfile: Optional[str],
-                                        fam_clan_dict: Dict[str, str],
+                                        fam_to_clan_dict: Dict[str, str],
+                                        fam_dict: Dict[str, int],
+                                        clan_dict: Dict[str, int],
+                                        seed: int = 0,
                                         vocab: Optional[Dict[str, int]] = None) -> None:
     if outfile is None:
         outfile = filename.rsplit('.')[0]
@@ -57,29 +64,42 @@ def convert_pfam_sequences_to_tfrecords(filename: str,
     if vocab is None:
         vocab = {"<PAD>": 0, "<MASK>": 1, "<CLS>": 2, "<SEP>": 3}
 
-    fam_dict: Dict[str, int] = {}
-    clan_dict = {'no_clan': 0}
-
+    serialize_map_fn = partial(serialize_pfam_sequence, vocab=vocab, fam_dict=fam_dict, clan_dict=clan_dict)
     print("Forming Train Set")
 
-    with tf.python_io.TFRecordWriter(outfile + '.tfrecords') as writer:
-        for record in tqdm(SeqIO.parse(filename, 'fasta'), total=34353433):
-            seq, family, clan = parse_line(record, fam_clan_dict)
+    all_examples = []
+    holdout_examples = []
+    holdout_clans = ['CL0635', 'CL0624', 'CL0355', 'CL0100', 'CL0417', 'CL0630']
+    holdout_families = ['PF18346', 'PF14604', 'PF18697', 'PF03577', 'PF01112', 'PF03417']
 
-            serialized_example, vocab, fam_dict, clan_dict = serialize_pfam_sequence(
-                seq, family, clan, vocab, fam_dict, clan_dict)
+    for record in tqdm(SeqIO.parse(filename, 'fasta'), total=34353433):
+        seq, family, clan = parse_line(record, fam_to_clan_dict)
+        if clan in holdout_clans or family in holdout_families:
+            holdout_examples.append((seq, family, clan))
+        else:
+            all_examples.append((seq, family, clan))
 
+    print("Shuffling")
+    random.seed(seed)
+    random.shuffle(all_examples)
+
+    print("Writing holdout")
+    with tf.python_io.TFRecordWriter(outfile + '_holdout' + '.tfrecords') as writer:
+        for seq, family, clan in holdout_examples:
+            serialized_example = serialize_pfam_sequence(seq, family, clan, vocab, fam_dict, clan_dict)
             writer.write(serialized_example)
 
-    print("Dumping Dicts")
-    with open(outfile.rsplit('.', maxsplit=1)[0] + '.vocab', 'wb') as f:
-        pkl.dump(vocab, f)
+    num_files = 60
+    print("Serializing training examples")
+    with Pool() as p:
+        serialized_examples = p.starmap(serialize_map_fn, all_examples)
 
-    with open(outfile.rsplit('.', maxsplit=1)[0] + '_fams.pkl', 'wb') as f:
-        pkl.dump(fam_dict, f)
-
-    with open(outfile.rsplit('.', maxsplit=1)[0] + '_clans.pkl', 'wb') as f:
-        pkl.dump(clan_dict, f)
+    print("Writing training set")
+    for i in range(num_files):
+        filename = outfile + '_' + str(i) + '.tfrecords'
+        with tf.python_io.TFRecordWriter(filename) as writer:
+            for serialized_example in serialized_examples[i::num_files]:
+                writer.write(serialized_example)
 
 
 def serialize_pfam_sequence(sequence: str,
@@ -94,31 +114,19 @@ def serialize_pfam_sequence(sequence: str,
             raise ValueError("whitespace found in string")
 
         aa_idx = vocab.get(aa)
-        if aa_idx is None:
-            vocab[aa] = len(vocab)  # Can't do this with defaultdict b/c it depends on the dictionary
-            aa_idx = vocab[aa]
-
         int_sequence.append(aa_idx)
 
     clan_idx = clan_dict.get(clan)
-    if clan_idx is None:
-        clan_dict[clan] = len(clan_dict)
-        clan_idx = clan_dict[clan]
-
     fam_idx = fam_dict.get(family)
-    if fam_idx is None:
-        fam_dict[family] = len(fam_dict)
-        fam_idx = fam_dict[family]
 
     protein_context = to_features(protein_length=len(int_sequence), clan=clan_idx, family=fam_idx)
-    protein_features = to_sequence_features(sequence=int_sequence)
+    protein_features = to_sequence_features(primary=int_sequence)
 
     example = tf.train.SequenceExample(context=protein_context, feature_lists=protein_features)
-    return example.SerializeToString(), vocab, fam_dict, clan_dict
+    return example.SerializeToString()
 
 
-def deserialize_pfam_sequence(example, add_cls_token: bool = False, cls_token: Optional[int] = None):
-    assert not (add_cls_token and cls_token is None)
+def deserialize_pfam_sequence(example):
     context = {
         'protein_length': tf.FixedLenFeature([1], tf.int64),
         'clan': tf.FixedLenFeature([1], tf.int64),
@@ -126,7 +134,7 @@ def deserialize_pfam_sequence(example, add_cls_token: bool = False, cls_token: O
     }
 
     features = {
-        'sequence': tf.FixedLenSequenceFeature([1], tf.int64),
+        'primary': tf.FixedLenSequenceFeature([1], tf.int64),
     }
 
     context, features = tf.parse_single_sequence_example(
@@ -138,14 +146,9 @@ def deserialize_pfam_sequence(example, add_cls_token: bool = False, cls_token: O
     protein_length = tf.to_int32(context['protein_length'][0])
     clan = tf.cast(context['clan'][0], tf.int32)
     family = tf.cast(context['family'][0], tf.int32)
-    sequence = tf.to_int32(features['sequence'][:, 0])
+    primary = tf.to_int32(features['primary'][:, 0])
 
-    if add_cls_token:
-        sequence = tf.pad(sequence, [[1, 0]], constant_values=cls_token)
-        protein_length += 1
-
-    return {'serialized': example,
-            'sequence': sequence,
+    return {'primary': primary,
             'protein_length': protein_length,
             'clan': clan,
             'family': family}
@@ -156,9 +159,26 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='convert protein sequences to tfrecords')
     parser.add_argument('filename', type=str, help='text file to convert to tfrecords')
     parser.add_argument('--fam-to-clan-file', type=str, help='.TSV file mapping families to clans')
+    parser.add_argument('--fampkl', type=str, help='python pickle mapping families to ints')
+    parser.add_argument('--clanpkl', type=str, help='python pickle mapping clans to ints')
     parser.add_argument('--outfile', type=str, default=None, help='name of outfile')
     args = parser.parse_args()
 
-    FAM_TO_CLAN_MAP = form_clan_fam_map(args.fam_to_clan_file)
-    print("Family to Clan dict Loaded")
-    convert_pfam_sequences_to_tfrecords(args.filename, args.outfile, FAM_TO_CLAN_MAP)
+    fam_to_clan_dict = form_clan_fam_map(args.fam_to_clan_file)
+    with open(args.fampkl, 'rb') as f:
+        fam_to_int_dict = pkl.load(f)
+    with open(args.clanpkl, 'rb') as f:
+        clan_to_int_dict = pkl.load(f)
+    convert_pfam_sequences_to_tfrecords(args.filename,
+                                        args.outfile,
+                                        fam_to_clan_dict,
+                                        fam_to_int_dict,
+                                        clan_to_int_dict,
+                                        vocab=PFAM_VOCAB)
+
+# python -m tape.data_utils.pfam_protein_serializer \
+#     data/pfam/Pfam-A.fasta \
+#     --outfile data/pfam_reserialize/pfam31 \
+#     --fam-to-clan-file data/pfam/Pfam-A.clans.tsv \
+#     --fampkl data/pkls/pfam_fams_public.pkl \
+#     --clanpkl data/pkls/pfam_clans_public.pkl

@@ -15,7 +15,7 @@ class LanguageModelingTask(AbstractLanguageModelingTask):
             key_metric='LMACC',
             deserialization_func=deserialize_pfam_sequence,
             n_classes=n_symbols,
-            label_name='sequence',
+            label_name='primary',
             input_name='encoder_output',
             output_name='lm_logits')
 
