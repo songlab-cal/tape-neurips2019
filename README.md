@@ -101,12 +101,12 @@ In the meantime, here's a temporary leaderboard for each task. All reported mode
 | Ranking | Model | L/5 Medium + Long Range |
 |:-:|:-:|:-:|
 | 1. | One Hot + Alignment | 0.64 |
-| 2. | LSTM | 0.49 |
-| 3. | Unirep | 0.45 |
-| 4. | Bepler | 0.42 |
-| 5. | Transformer | 0.34 |
+| 2. | Bepler | 0.40 |
+| 3. | LSTM | 0.39 |
+| 4. | Transformer | 0.36 |
+| 5. | Unirep | 0.34 |
+| 6. | ResNet | 0.29 |
 | 6. | One Hot | 0.29 |
-| 7. | ResNet | 0.28 |
 
 ### Remote Homology Detection
 
