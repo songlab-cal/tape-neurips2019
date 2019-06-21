@@ -1,3 +1,8 @@
+"""Evaluate contact prediction.
+
+Use this script with ``python -m tape.analysis.evaluate_contact_prediction``.
+"""
+
 from typing import List, Callable
 
 import math
