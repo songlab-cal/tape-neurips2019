@@ -8,4 +8,5 @@ pyyaml
 biopython
 sacred
 pandas
+pillow
 toposort
