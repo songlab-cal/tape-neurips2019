@@ -18,11 +18,12 @@ setup(
     url='https://github.com/nickbhat/tape',
     license=LICENSE,
     install_requires=[
-        'tensorflow-gpu',
+        'tensorflow-gpu<1.14.0',
         'numpy',
         'rinokeras==1.1.1',
         'biopython',
         'sacred',
         'table_logger',
-        'pandas']
+        'pandas',
+        'pillow']
 )
