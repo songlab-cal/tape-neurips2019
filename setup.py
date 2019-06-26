@@ -18,12 +18,13 @@ setup(
     url='https://github.com/nickbhat/tape',
     license=LICENSE,
     install_requires=[
-        'tensorflow-gpu<1.14.0',
+        'tensorflow-gpu<1.14.0',  # https://github.com/IDSIA/sacred/issues/493
         'numpy',
         'rinokeras==1.1.1',
         'biopython',
         'sacred',
         'table_logger',
         'pandas',
-        'pillow']
+        'pillow',
+        'pymongo']   # https://github.com/IDSIA/sacred/issues/491
 )
