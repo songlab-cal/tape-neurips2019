@@ -36,13 +36,13 @@ class AbstractLanguageModelingTask(SequenceToSequenceClassificationTask):
         return loss, metrics
 
     def get_train_files(self, data_folder) -> List[str]:
-        train_files = glob(os.path.join(data_folder, 'pfam', 'tfrecords', '*[0-9].tfrecord'))
+        train_files = glob(os.path.join(data_folder, 'pfam', '*train_*[0-9].tfrecord'))
         if len(train_files) == 0:
             raise FileNotFoundError("No training TFrecord files found in directory")
         return train_files
 
     def get_valid_files(self, data_folder) -> List[str]:
-        valid_files = glob(os.path.join(data_folder, 'pfam', 'tfrecords', '*valid.tfrecord'))
+        valid_files = glob(os.path.join(data_folder, 'pfam', '*valid_*[0-9].tfrecord'))
         if len(valid_files) == 0:
             raise FileNotFoundError("No validation TFrecord files found in directory")
         return valid_files
@@ -115,8 +115,7 @@ class AbstractLanguageModelingTask(SequenceToSequenceClassificationTask):
         print('Currently holding out the following clans: ', *_holdout_clans, sep='\n-')
 
         train_files = self.get_train_files(data_folder)
-        # valid_files = self.get_valid_files(data_folder)
-        valid_files = train_files[::20]
+        valid_files = self.get_valid_files(data_folder)
         train_files = [fname for fname in train_files if fname not in valid_files]
 
         train_filenames = tf.data.Dataset.from_tensor_slices(tf.constant(train_files))
