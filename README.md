@@ -2,6 +2,24 @@
 
 Data, weights, and code for running the TAPE benchmark on a trained protein embedding. We provide a pretraining corpus, five supervised downstream tasks, pretrained language model weights, and benchmarking code.
 
+## Contents
+
+* [Paper](#paper)
+* [Data](#data)
+* [Pretrained Models](#pretrained-models)
+* [Code Setup](#code-setup)
+* [Usage](#usage)
+    * [List of Models and Tasks](#list-of-models-and-tasks)
+* [Loading a Model](#loading-a-model)
+* [Saving Results](#saving-results)
+* [Leaderboard](#leaderboard)
+    * [Secondary Structure](#secondary-structure)
+    * [Contact Prediction](#contact-prediction)
+    * [Remote Homology Detection](#remote-homology-detection)
+    * [Fluorescence](#fluorescence)
+    * [Stability](#stability)
+* [Citation Guidelines](#citation-guidelines)
+
 ## Paper
 Preprint is available at [https://arxiv.org/abs/1906.08230](https://arxiv.org/abs/1906.08230).
 
