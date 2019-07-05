@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 wget http://s3.amazonaws.com/proteindata/data/secondary_structure.tar.gz
 wget http://s3.amazonaws.com/proteindata/data/proteinnet.tar.gz
 wget http://s3.amazonaws.com/proteindata/data/remote_homology.tar.gz

@@ -1,3 +1,8 @@
+"""Evaluate stability metrics.
+
+Use this script with ``python -m tape.analysis.evaluate_stability_metrics``.
+"""
+
 from typing import List
 
 import numpy as np 

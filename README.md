@@ -45,7 +45,9 @@ UniRep is described in [Alley et al](https://www.biorxiv.org/content/10.1101/589
 
 We recommend that you install `tape` into a python [virtual environment](https://virtualenv.pypa.io/en/latest/) using
 
-`pip install -e .`
+```bash
+$ pip install -e .
+```
 
 ## Usage
 
@@ -53,8 +55,9 @@ We recommend that you install `tape` into a python [virtual environment](https:/
 
 Sacred options are specified by running `python -m tape with <args>`. For example, to run the `transformer` model on the `masked_language_modeling` task, simply run
 
-    python -m tape with model=transformer tasks=masked_language_modeling
-
+```bash
+$ tape with model=transformer tasks=masked_language_modeling
+```
 Additional arguments can be specified by adding e.g. `transformer.n_layers=6`, `training.learning_rate=1e-4`, `gpu.device=0,1,2`, etc.
 
 Global arguments are defined under `@tape.config` in `tape/__main__.py`. Model specific arguments (e.g. `transformer.n_layers`) can be found in the corresponding model file (`tape/models/Transformer.py`).
