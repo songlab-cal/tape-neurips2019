@@ -1,9 +1,10 @@
-from typing import Dict, Type, List
+from typing import Dict, Type, List, Optional
 from sacred import Ingredient
 from tensorflow.keras import Model
 
 from tape.data_utils import PFAM_VOCAB
 
+from .AbstractTapeModel import AbstractTapeModel
 from .Transformer import Transformer, transformer_hparams
 from .Resnet import Resnet, resnet_hparams
 from .BidirectionalLSTM import BidirectionalLSTM, lstm_hparams
@@ -41,7 +42,16 @@ class ModelBuilder:
         return model_type(n_symbols)
 
     @staticmethod
-    def add_model(model_name: str, model: Type[Model], hparams: Ingredient) -> None:
-        assert isinstance(model, type) and isinstance(hparams, Ingredient)
+    def add_model(model_name: str,
+                  model: Type[AbstractTapeModel],
+                  hparams: Optional[Ingredient] = None) -> None:
+
+        if not issubclass(model, AbstractTapeModel):
+            raise TypeError("Model is not a subclass of AbstractTapeModel")
+        if hparams is not None and not isinstance(hparams, Ingredient):
+            raise TypeError("hparams object is not a sacred Ingredient")
+
         ModelBuilder.models[model_name] = model
-        ModelBuilder.hparams.append(hparams)
+
+        if hparams is not None:
+            ModelBuilder.hparams.append(hparams)
