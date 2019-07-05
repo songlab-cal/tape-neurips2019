@@ -24,7 +24,7 @@ setup(
         'biopython',
         'sacred',
         'table_logger',
-        'pandas',
+        'pandas'],
     entry_points={
         'console_scripts': [
             'tape = tape.__main__:main',
