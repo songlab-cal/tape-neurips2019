@@ -277,6 +277,10 @@ def eval(_run, _config, tasks: Union[str, List[str]], model: str):
     consolidate_data(outfile, include_hidden=True)
 
 
+def entrypoint():
+    proteins.run_commandline()
+
+
 @proteins.automain
 def main(_run, _config, tasks: Union[str, List[str]], model: str):
     outdir = _run.observers[0].basedir
