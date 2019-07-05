@@ -2,16 +2,36 @@
 
 Data, weights, and code for running the TAPE benchmark on a trained protein embedding. We provide a pretraining corpus, five supervised downstream tasks, pretrained language model weights, and benchmarking code.
 
+## Contents
+
+* [Paper](#paper)
+* [Data](#data)
+* [Pretrained Models](#pretrained-models)
+* [Code Setup](#code-setup)
+* [Usage](#usage)
+    * [List of Models and Tasks](#list-of-models-and-tasks)
+* [Loading a Model](#loading-a-model)
+* [Saving Results](#saving-results)
+* [Leaderboard](#leaderboard)
+    * [Secondary Structure](#secondary-structure)
+    * [Contact Prediction](#contact-prediction)
+    * [Remote Homology Detection](#remote-homology-detection)
+    * [Fluorescence](#fluorescence)
+    * [Stability](#stability)
+* [Citation Guidelines](#citation-guidelines)
+
 ## Paper
 Preprint is available at [https://arxiv.org/abs/1906.08230](https://arxiv.org/abs/1906.08230).
 
 ## Data
+Data should be placed in the `./data` folder, although you may also specify a different data directory if you wish.
 
-The data for training is hosted on AWS. All data are provided as TFRecords - see `tape/data_utils/` for deserializers for each dataset and documentation of data keys. If you wish to download all of TAPE, run `download_data.sh` to do so. We also provide links to each individual dataset below:
+The supervised data is around 120MB compressed and 900 MB uncompressed.
+The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed.
+
+The data for training is hosted on AWS. All data are provided as TFRecords - see `./tape/data_utils/` for deserializers for each dataset and documentation of data keys. If you wish to download all of TAPE, run `download_data.sh` to do so. We also provide links to each individual dataset below:
 
 [Pretraining Corpus (Pfam)](http://s3.amazonaws.com/proteindata/data/pfam.tar.gz) __|__ [Secondary Structure](http://s3.amazonaws.com/proteindata/data/secondary_structure.tar.gz) __|__ [Contact (ProteinNet)](http://s3.amazonaws.com/proteindata/data/proteinnet.tar.gz) __|__ [Remote Homology](http://s3.amazonaws.com/proteindata/data/remote_homology.tar.gz) __|__ [Fluorescence](http://s3.amazonaws.com/proteindata/data/fluorescence.tar.gz) __|__ [Stability](http://s3.amazonaws.com/proteindata/data/stability.tar.gz)
-
-The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed. The supervised data is around 120MB compressed and 900 MB uncompressed. Data should be placed in the `tape/data` folder, although you may also specify a different data directory if you wish.
 
 ## Pretrained Models
 

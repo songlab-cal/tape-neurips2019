@@ -22,14 +22,14 @@ class Task(ABC):
         self._deserialization_func = deserialization_func
 
     def get_train_files(self, data_folder: str) -> List[str]:
-        train_file = os.path.join(data_folder, str(self), '{}_train.tfrecords'.format(self))
+        train_file = os.path.join(data_folder, str(self), '{}_train.tfrecord'.format(self))
         if not os.path.exists(train_file):
             raise FileNotFoundError(train_file)
 
         return [train_file]
 
     def get_valid_files(self, data_folder: str) -> List[str]:
-        valid_file = os.path.join(data_folder, str(self), '{}_valid.tfrecords'.format(self))
+        valid_file = os.path.join(data_folder, str(self), '{}_valid.tfrecord'.format(self))
         if not os.path.exists(valid_file):
             raise FileNotFoundError(valid_file)
 
