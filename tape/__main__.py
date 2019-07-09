@@ -7,7 +7,6 @@ import shutil
 import pickle as pkl
 
 import tensorflow as tf
-from tensorflow.contrib.distribute import MirroredStrategy
 
 from tape.tasks import TaskBuilder, Task, AbstractLanguageModelingTask
 from tape.models import ModelBuilder
