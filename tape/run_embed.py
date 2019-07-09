@@ -6,6 +6,7 @@ import argparse
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile', default='')
+    parser.add_argument('--model', default='')
     args = parser.parse_args()
 
     task = 'embedding'
@@ -13,7 +14,8 @@ def main():
     config_updates = {
         'tasks': task,
         'save_outputs': True,
-        'datafile': args.datafile}
+        'datafile': args.datafile,
+        'model': args.model}
 
     proteins.run(
         'embed',
