@@ -73,7 +73,7 @@ Results will be stored in `results/`. Each run will be placed in a timestamped d
 
 ### Running the trained Task Model
 
-Once you've trained your task model, you can run an evaluation step like this, passing your test set (as tfrecords) to `--datafile`
+Once you've trained your task model, you can run an evaluation step like this, passing your test set (as tfrecords) to `--datafile`:
 
 ```bash
 $ tape-eval results/<task-name>-<model>-<time-stamp>/ --datafile data/remote_homology/remote_homology_test_fold_holdout.tfrecord
