@@ -24,7 +24,9 @@ setup(
         'biopython',
         'sacred',
         'table_logger',
-        'pandas'],
+        'pandas',
+        'pillow',
+        'pymongo'],   # https://github.com/IDSIA/sacred/issues/491]
     entry_points={
         'console_scripts': [
             'tape = tape.__main__:entrypoint',
