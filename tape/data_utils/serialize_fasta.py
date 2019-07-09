@@ -23,7 +23,7 @@ def fasta_to_tfrecord(filename, vocab=PFAM_VOCAB):
                 raise ValueError("whitespace found in sequence for {}".format(description))
             int_sequence.append(vocab.get(aa))
 
-        protein_context = to_features(protein_length=len(int_sequence), description=description.encode('UTF-8'))
+        protein_context = to_features(protein_length=len(int_sequence), id=description.encode('UTF-8'))
         protein_features = to_sequence_features(primary=int_sequence)
 
         example = tf.train.SequenceExample(context=protein_context, feature_lists=protein_features)
@@ -37,8 +37,28 @@ def fasta_to_tfrecord(filename, vocab=PFAM_VOCAB):
         writer.write(example.SerializeToString())
 
 
+def deserialize_protein_sequence(example):
+    context = {
+        'protein_length': tf.FixedLenFeature([1], tf.int64),
+        'id': tf.FixedLenFeature([], tf.string)
+    }
+
+    features = {
+        'primary': tf.FixedLenSequenceFeature([1], tf.int64),
+    }
+
+    context, features = tf.parse_single_sequence_example(
+        example,
+        context_features=context,
+        sequence_features=features
+    )
+
+    return {'id': context['id'],
+            'primary': tf.to_int32(features['primary'][:, 0]),
+            'protein_length': tf.to_int32(context['protein_length'][0])}
+
+
 if __name__ == '__main__':
-    fasta_to_tfrecord
     import argparse
     parser = argparse.ArgumentParser(description='convert protein sequences to tfrecords')
     parser.add_argument('filename', type=str, help='text file to convert to tfrecords')
