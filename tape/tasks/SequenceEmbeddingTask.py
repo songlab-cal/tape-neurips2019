@@ -3,7 +3,6 @@ from typing import Dict, Tuple, List, Callable
 import tensorflow as tf
 
 from tape.data_utils.serialize_fasta import deserialize_protein_sequence
-from tape.losses import binary_loss_and_accuracy
 
 from .Task import Task
 
@@ -22,11 +21,8 @@ class SequenceEmbeddingTask(Task):
     def loss_function(self,
                       inputs: Dict[str, tf.Tensor],
                       outputs: Dict[str, tf.Tensor]) -> Tuple[tf.Tensor, Dict[str, tf.Tensor]]:
-        label = [0]*len(inputs)
-        prediction = [0]*len(outputs)
-        loss, accuracy = binary_loss_and_accuracy(label, prediction)
-
-        metrics = {self.key_metric: accuracy}
+        metrics = {self.key_metric: 1.0}
+        loss = 0.0  # loss has to be a float
 
         return loss, metrics
 

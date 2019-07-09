@@ -304,7 +304,7 @@ def embed(_run, _config, tasks: Union[str, List[str]], model: str):
 
     if _config['load_from'] is not None:
         print('Loading weights from {}'.format(_config['load_from']))
-        rk.utils.load_distributed(MirroredStrategy, embedding_model, _config['load_from'])
+        rk.utils.load_distributed(experiment.distribution_strategy, task_model, _config['load_task_from'])
 
     outfile = 'outputs.pkl'
 
