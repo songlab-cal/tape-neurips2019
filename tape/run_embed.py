@@ -7,6 +7,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile', default='')
     parser.add_argument('--model', default='')
+    parser.add_argument('--load-from', default='')
     args = parser.parse_args()
 
     task = 'embedding'
@@ -15,7 +16,8 @@ def main():
         'tasks': task,
         'save_outputs': True,
         'datafile': args.datafile,
-        'model': args.model}
+        'model': args.model,
+        'load_from': args.load_from}
 
     proteins.run(
         'embed',
