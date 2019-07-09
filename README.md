@@ -2,6 +2,25 @@
 
 Data, weights, and code for running the TAPE benchmark on a trained protein embedding. We provide a pretraining corpus, five supervised downstream tasks, pretrained language model weights, and benchmarking code.
 
+## Contents
+
+* [Paper](#paper)
+* [Data](#data)
+* [Pretrained Models](#pretrained-models)
+* [Code Setup](#code-setup)
+* [Usage](#usage)
+    * [List of Models and Tasks](#list-of-models-and-tasks)
+    * [Loading a Model](#loading-a-model)
+    * [Saving Results](#saving-results)
+* [Extending Tape](#extending-tape)
+* [Leaderboard](#leaderboard)
+    * [Secondary Structure](#secondary-structure)
+    * [Contact Prediction](#contact-prediction)
+    * [Remote Homology Detection](#remote-homology-detection)
+    * [Fluorescence](#fluorescence)
+    * [Stability](#stability)
+* [Citation Guidelines](#citation-guidelines)
+
 ## Paper
 Preprint is available at [https://arxiv.org/abs/1906.08230](https://arxiv.org/abs/1906.08230).
 
@@ -27,7 +46,9 @@ UniRep is described in [Alley et al](https://www.biorxiv.org/content/10.1101/589
 
 We recommend that you install `tape` into a python [virtual environment](https://virtualenv.pypa.io/en/latest/) using
 
-`pip install -e .`
+```bash
+$ pip install -e .
+```
 
 ## Usage
 
@@ -35,8 +56,9 @@ We recommend that you install `tape` into a python [virtual environment](https:/
 
 Sacred options are specified by running `python -m tape with <args>`. For example, to run the `transformer` model on the `masked_language_modeling` task, simply run
 
-    python -m tape with model=transformer tasks=masked_language_modeling
-
+```bash
+$ tape with model=transformer tasks=masked_language_modeling
+```
 Additional arguments can be specified by adding e.g. `transformer.n_layers=6`, `training.learning_rate=1e-4`, `gpu.device=0,1,2`, etc.
 
 Global arguments are defined under `@tape.config` in `tape/__main__.py`. Model specific arguments (e.g. `transformer.n_layers`) can be found in the corresponding model file (`tape/models/Transformer.py`).
@@ -72,13 +94,17 @@ Finally we also provide the `netsurf` task, which does the full multi-task Netsu
 
 The available models and tasks can be found in `tape/models/ModelBuilder.py` and `tape/tasks/TaskBuilder.py`.
 
-## Loading a Model
+### Loading a Model
 
 There are two ways of loading a model, depending on whether you want to load the unsupervised pre-training weights or the supervised task-specific weights. Loading unsupervised weights is done by passing the argument `load_from=</path/to/unsupervised_weights.h5>`. Loading supervised weights is done by passing the argument `load_task_from=</path/to/supervised_weights.h5>`.
 
-## Saving Results
+### Saving Results
 
 Results will be stored in `tape/results`. Each run will be placed in a timestamped directory. All `tape` sources will automatically be saved, along with the config and per-epoch metrics.
+
+## Extending Tape
+
+If you'd like to extend `tape` directly, it is certainly possible. Unfortunately `sacred`, while great for storing and logging results, is a little bit of a pain when it comes to modularity and extensibility. That being said, it is reasonably straightforward to add a Keras model into the training framework. For examples on how to do this, see the `examples/` directory, which contains two files showing how to add a model, and how to add a model with hyperparameters. If there is a more specific example that would be helpful, please open an issue and we will try to add it if we have time.
 
 ## Leaderboard
 

@@ -1,3 +1,8 @@
+"""Evaluate fluorescence metrics.
+
+Use this script with ``python -m tape.analysis.evaluate_fluorescence_metrics``.
+"""
+
 from typing import List
 
 import numpy as np 

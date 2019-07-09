@@ -65,9 +65,13 @@ def run_supervised_experiments(load_from: str):
         p.join()
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Run all supervised experiments')
     parser.add_argument('load_from', type=str)
     args = parser.parse_args()
 
     run_supervised_experiments(args.load_from)
+
+
+if __name__ == '__main__':
+    main()
