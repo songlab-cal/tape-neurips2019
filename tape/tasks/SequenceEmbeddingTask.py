@@ -10,7 +10,7 @@ from .Task import Task
 class SequenceEmbeddingTask(Task):
 
     def __init__(self,
-                 key_metric: str = 'whocares',
+                 key_metric: str = 'N/A: No metric for embedding task',
                  deserialization_func: Callable[[bytes], Dict[str, tf.Tensor]] = deserialize_protein_sequence,
                  input_name: str = 'encoder_output',
                  output_name: str = 'encoder_output'):
