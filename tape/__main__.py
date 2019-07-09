@@ -257,7 +257,7 @@ def eval(_run, _config, tasks: Union[str, List[str]], model: str):
         _, valid_data = get_data(task_list, embedding_model.get_optimal_batch_sizes())
     else:
         datafile = _config['datafile'] if ',' not in _config['datafile'] else _config['datafile'].split(',')
-        valid_data = task_list[0].get_test_data(embedding_model.boundaries, datafile)
+        valid_data = task_list[0].get_test_data(embedding_model.get_optimal_batch_sizes(), datafile)
 
     test_graph = rk.train.TestGraph.from_experiment(experiment, valid_data)
 
