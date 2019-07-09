@@ -17,6 +17,7 @@ from .NetsurfTask import NetsurfTask
 from .BeplerPairedScopeTask import BeplerPairedScopeTask
 from .RemoteHomologyTask import RemoteHomologyTask
 from .SecondaryStructureTask import SecondaryStructureTask, secondary_structure_params
+from .SequenceEmbeddingTask import SequenceEmbeddingTask
 from .UnidirectionalLanguageModelingTask import UnidirectionalLanguageModelingTask
 
 
@@ -27,6 +28,7 @@ class TaskBuilder:
         'bepler_language_modeling': BeplerLanguageModelingTask,
         'bepler_paired_scope': BeplerPairedScopeTask,
         'contact_map': ContactMapTask,
+        'embedding': SequenceEmbeddingTask,
         'fluorescence': FluorescenceTask,
         'language_modeling': LanguageModelingTask,
         'masked_language_modeling': MaskedLanguageModelingTask,
