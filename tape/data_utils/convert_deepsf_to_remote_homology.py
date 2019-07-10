@@ -237,7 +237,7 @@ if __name__ == '__main__':
 
     filenames = glob(os.path.join(args.listdir, '*.list*'))
 
-    infilenames = ['test_dataset.list_family', 'test_dataset.list_superfamily', 'test_dataset.list_fold', 'Traindata.list',  'validation.list']
+    infilenames = ['test_dataset.list_family', 'test_dataset.list_superfamily', 'test_dataset.list_fold',  'validation.list', 'Traindata.list']
     infilenames = [os.path.join(args.listdir, name) for name in infilenames]
 
     outfilenames = ['remote_homology_test_family_holdout.tfrecords',
