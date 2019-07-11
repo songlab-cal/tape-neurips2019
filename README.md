@@ -126,7 +126,7 @@ This will create a new serialized file in the same directory `<filename>.tfrecor
 $ tape-embed --datafile <filename>.tfrecord --model <model> --load-from <pretrained-weights>.h5
 ```
 
-Which will create a file `outputs.pkl` in your current directory with the embeddings.
+Which will create a file `outputs.pkl` in your current directory with the embeddings. This file has a dictionary with keys `['encoder_output', 'id', 'protein_length', 'primary']`, each mapping to a list of the corresponding results for each input protein. `outputs['encoder_output'][i]` is an `L_i x d` 2D array corresponding to the `d`-dimensional embedding of each residue in a protein `i` of length `L_i`. `id` is the string description of the sequence (from the fasta file). `primary` is the length `L_i` vector of integer amino-acid codes for the sequence. You can decode these back to 1 letter string codes using `from tape.data_utils.vocabs import PFAM_VOCAB`.
 
 ## Extending Tape
 
