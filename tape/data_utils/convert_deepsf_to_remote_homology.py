@@ -1,12 +1,13 @@
-from typing import Dict
-from pprint import pprint
 from functools import partial
-from multiprocessing import Pool
 from glob import glob
+from multiprocessing import Pool
+from pprint import pprint
+from typing import Dict
 import os
+import pickle as pkl
 
-import tensorflow as tf
 from Bio import SeqIO
+import tensorflow as tf
 
 from .remote_homology_serializer import serialize_remote_homology_sequence
 from .vocabs import PFAM_VOCAB
@@ -215,12 +216,20 @@ def convert_deepsf_data_to_tfrecords(filenames: str,
     pprint(skipped_ids)
     print('Num classes {}'.format(len(class_to_int_label)))
     pprint(class_to_int_label)
+    with open('class_to_int_label.pkl', 'wb') as f:
+        pkl.dump(class_to_int_label, f)
     print('Num folds {}'.format(len(fold_to_int_label)))
     pprint(fold_to_int_label)
+    with open('fold_to_int_label.pkl', 'wb') as f:
+        pkl.dump(fold_to_int_label, f)
     print('Num superfams {}'.format(len(superfamily_to_int_label)))
     pprint(superfamily_to_int_label)
+    with open('superfamily_to_int_label.pkl', 'wb') as f:
+        pkl.dump(superfamily_to_int_label, f)
     print('Num fams {}'.format(len(family_to_int_label)))
     pprint(family_to_int_label)
+    with open('family_to_int_label.pkl', 'wb') as f:
+        pkl.dump(family_to_int_label, f)
 
 
 if __name__ == '__main__':
