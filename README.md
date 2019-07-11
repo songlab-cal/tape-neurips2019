@@ -6,6 +6,8 @@ Data, weights, and code for running the TAPE benchmark on a trained protein embe
 
 * [Paper](#paper)
 * [Data](#data)
+   * [TFRecord Data](#tfrecord-data)
+   * [Raw Data](#raw-data)
 * [Pretrained Models](#pretrained-models)
 * [Code Setup](#code-setup)
 * [Usage](#usage)
@@ -28,11 +30,17 @@ Preprint is available at [https://arxiv.org/abs/1906.08230](https://arxiv.org/ab
 Data should be placed in the `./data` folder, although you may also specify a different data directory if you wish.
 
 The supervised data is around 120MB compressed and 900 MB uncompressed.
-The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed.
+The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed. The data for training is hosted on AWS. By default we provide data as TFRecords - see `./tape/data_utils/` for deserializers for each dataset and documentation of data keys. If you wish to download all of TAPE, run `download_data.sh` to do so. We also provide links to each individual dataset below in both TFRecord format and JSON format.
 
-The data for training is hosted on AWS. All data are provided as TFRecords - see `./tape/data_utils/` for deserializers for each dataset and documentation of data keys. If you wish to download all of TAPE, run `download_data.sh` to do so. We also provide links to each individual dataset below:
+### TFRecord Data
 
 [Pretraining Corpus (Pfam)](http://s3.amazonaws.com/proteindata/data/pfam.tar.gz) __|__ [Secondary Structure](http://s3.amazonaws.com/proteindata/data/secondary_structure.tar.gz) __|__ [Contact (ProteinNet)](http://s3.amazonaws.com/proteindata/data/proteinnet.tar.gz) __|__ [Remote Homology](http://s3.amazonaws.com/proteindata/data/remote_homology.tar.gz) __|__ [Fluorescence](http://s3.amazonaws.com/proteindata/data/fluorescence.tar.gz) __|__ [Stability](http://s3.amazonaws.com/proteindata/data/stability.tar.gz)
+
+### Raw Data
+
+Raw data files are stored in JSON format for maximum portability. These are larger than the serialized TFRecord files (on average 3x larger). For all tasks except `proteinnet` we directly provide the output of our TFRecord parsing function on the file. For the `proteinnet` task we don't directly provide contact maps (as these massively increase the size of the files) and instead provide the 3D positions of all Carbon-alpha atoms. Note that this is in fact what is stored in the TFRecord files as well - our parsing function constructs the contact maps from this information on-the-fly.
+
+[Pretraining Corpus (Pfam)](http://s3.amazonaws.com/proteindata/data_raw/pfam.tar.gz) __|__ [Secondary Structure](http://s3.amazonaws.com/proteindata/data_raw/secondary_structure.tar.gz) __|__ Contact (ProteinNet) (in progress) __|__ [Remote Homology](http://s3.amazonaws.com/proteindata/data_raw/remote_homology.tar.gz) __|__ [Fluorescence](http://s3.amazonaws.com/proteindata/data_raw/fluorescence.tar.gz) __|__ [Stability](http://s3.amazonaws.com/proteindata/data_raw/stability.tar.gz)
 
 ## Pretrained Models
 
