@@ -40,7 +40,7 @@ The unsupervised Pfam dataset is around 5GB compressed and 40GB uncompressed. Th
 
 Raw data files are stored in JSON format for maximum portability. These are larger than the serialized TFRecord files (on average 3x larger). For all tasks except `proteinnet` we directly provide the output of our TFRecord parsing function on the file. For the `proteinnet` task we don't directly provide contact maps (as these massively increase the size of the files) and instead provide the 3D positions of all Carbon-alpha atoms. Note that this is in fact what is stored in the TFRecord files as well - our parsing function constructs the contact maps from this information on-the-fly.
 
-[Pretraining Corpus (Pfam)](http://s3.amazonaws.com/proteindata/data_raw/pfam.tar.gz) __|__ [Secondary Structure](http://s3.amazonaws.com/proteindata/data_raw/secondary_structure.tar.gz) __|__ Contact (ProteinNet) (in progress) __|__ [Remote Homology](http://s3.amazonaws.com/proteindata/data_raw/remote_homology.tar.gz) __|__ [Fluorescence](http://s3.amazonaws.com/proteindata/data_raw/fluorescence.tar.gz) __|__ [Stability](http://s3.amazonaws.com/proteindata/data_raw/stability.tar.gz)
+[Pretraining Corpus (Pfam)](http://s3.amazonaws.com/proteindata/data_raw/pfam.tar.gz) __|__ [Secondary Structure](http://s3.amazonaws.com/proteindata/data_raw/secondary_structure.tar.gz) __|__ [Contact (ProteinNet)](http://s3.amazonaws.com/proteindata/data_raw/proteinnet.tar.gz) __|__ [Remote Homology](http://s3.amazonaws.com/proteindata/data_raw/remote_homology.tar.gz) __|__ [Fluorescence](http://s3.amazonaws.com/proteindata/data_raw/fluorescence.tar.gz) __|__ [Stability](http://s3.amazonaws.com/proteindata/data_raw/stability.tar.gz)
 
 ## Pretrained Models
 
