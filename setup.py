@@ -33,6 +33,7 @@ setup(
             'tape-embed = tape.run_embed:main',
             'tape-eval = tape.run_eval:main',
             'tape-supervised = tape.run_supervised_experiments:main',
+            'tape-serialize = tape.data_utils.serialize_fasta:main',
         ],
     },
 )

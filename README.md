@@ -117,7 +117,7 @@ The available models and tasks can be found in `tape/models/ModelBuilder.py` and
 If you would just like the embeddings for a list of proteins, first convert your fasta to tfrecords
 
 ```bash
-$ python tape/data_utils/serialize_fasta.py <filename>.fasta
+$ tape-serialize <filename>.fasta
 ```
 
 This will create a new serialized file in the same directory `<filename>.tfrecord`. You can then extract the embeddings with

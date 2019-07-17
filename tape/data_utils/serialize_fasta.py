@@ -58,10 +58,14 @@ def deserialize_protein_sequence(example):
             'protein_length': tf.to_int32(context['protein_length'][0])}
 
 
-if __name__ == '__main__':
+def main():
     import argparse
     parser = argparse.ArgumentParser(description='convert protein sequences to tfrecords')
     parser.add_argument('filename', type=str, help='text file to convert to tfrecords')
     args = parser.parse_args()
 
     fasta_to_tfrecord(args.filename)
+
+
+if __name__ == '__main__':
+    main()
