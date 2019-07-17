@@ -7,9 +7,6 @@ from Bio import SeqIO
 from tape.data_utils.tf_data_utils import to_features, to_sequence_features
 from tape.data_utils.vocabs import PFAM_VOCAB
 
-filename = 'small.fasta'
-vocab = PFAM_VOCAB
-
 
 def fasta_to_tfrecord(filename, vocab=PFAM_VOCAB):
     proteins_to_embed = []
