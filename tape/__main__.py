@@ -277,41 +277,6 @@ def eval(_run, _config, tasks: Union[str, List[str]], model: str):
     consolidate_data(outfile, include_hidden=True)
 
 
-@proteins.command
-def embed(_run, _config, tasks: Union[str, List[str]], model: str):
-    sess = setup_tensorflow()
-
-    if isinstance(tasks, str):
-        tasks = [tasks]
-
-    embedding_model = ModelBuilder.build_model(model)
-    task_list = TaskBuilder.build_tasks(tasks)
-    task_model = TaskBuilder.build_task_model(
-        embedding_model, task_list, _config['freeze_embedding_weights'])
-
-    experiment = ProteinExperiment(
-        task_model, task_list)
-
-    datafile = _config['datafile'] if ',' not in _config['datafile'] else _config['datafile'].split(',')
-    valid_data = task_list[0].get_test_data(embedding_model.get_optimal_batch_sizes(), datafile)
-
-    sess.run(tf.global_variables_initializer())
-
-    test_graph = rk.train.TestGraph.from_experiment(experiment, valid_data)
-
-    print('Model Parameters: {}'.format(embedding_model.count_params()))
-
-    if _config['load_from'] is not None:
-        print('Loading weights from {}'.format(_config['load_from']))
-        rk.utils.load_distributed(experiment.distribution_strategy, embedding_model, _config['load_from'])
-
-    outfile = 'outputs.pkl'
-
-    print('Saving outputs to {}'.format(outfile))
-    test_graph.run_epoch(save_outputs=outfile)
-    consolidate_data(outfile, include_hidden=True)
-
-
 def entrypoint():
     proteins.run_commandline()
 

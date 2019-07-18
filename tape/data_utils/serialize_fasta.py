@@ -34,7 +34,7 @@ def fasta_to_tfrecord(filename, vocab=PFAM_VOCAB):
         writer.write(example.SerializeToString())
 
 
-def deserialize_protein_sequence(example):
+def deserialize_fasta_sequence(example):
     context = {
         'protein_length': tf.FixedLenFeature([1], tf.int64),
         'id': tf.FixedLenFeature([], tf.string)
