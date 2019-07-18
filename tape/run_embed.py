@@ -14,11 +14,14 @@ from tape.models import ModelBuilder
 def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
     sess = tf.Session()
     embedding_model = ModelBuilder.build_model(model)
-    if load_from is not None:
-        embedding_model.load_weights(load_from)
+
     sequence = tf.placeholder(tf.int32, [None, None])
     protein_length = tf.placeholder(tf.int32, [None])
     output = embedding_model({'sequence': sequence, 'protein_length': protein_length})
+
+    if load_from is not None:
+        embedding_model.load_weights(load_from)
+
     embeddings = []
     for record in SeqIO.parse(fasta_file, 'fasta'):
         int_sequence = np.array([vocab[aa] for aa in record.seq])
@@ -30,8 +33,14 @@ def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
 def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VOCAB):
     sess = tf.Session()
     embedding_model = ModelBuilder.build_model(model)
+
+    sequence = tf.placeholder(tf.int32, [None, None])
+    protein_length = tf.placeholder(tf.int32, [None])
+    output = embedding_model({'sequence': sequence, 'protein_length': protein_length})
+
     if load_from is not None:
         embedding_model.load_weights(load_from)
+
     data = tf.data.TFRecordDataset(tfrecord_file).map(deserialize_fasta_sequence)
     iterator = data.make_one_shot_iterator()
     batch = iterator.get_next()
@@ -46,7 +55,7 @@ def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VO
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--datafile', default='')
+    parser.add_argument('datafile')
     parser.add_argument('--model', default='')
     parser.add_argument('--load-from', default=None)
     args = parser.parse_args()
