@@ -1,5 +1,6 @@
 import argparse
 from contextlib import suppress
+import pickle as pkl
 
 import tensorflow as tf
 import numpy as np
@@ -22,7 +23,6 @@ def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
     sess.run(tf.global_variables_initializer())
     if load_from is not None:
         embedding_model.load_weights(load_from)
-
 
     embeddings = []
     for record in SeqIO.parse(fasta_file, 'fasta'):
@@ -64,11 +64,13 @@ def main():
     args = parser.parse_args()
 
     if args.datafile.endswith('.fasta'):
-        embed_from_fasta(args.datafile, args.model, args.load_from)
+        embeddings = embed_from_fasta(args.datafile, args.model, args.load_from)
     elif args.datafile.endswith('.tfrecord'):
-        embed_from_tfrecord(args.datafile, args.model, args.load_from)
+        embeddings = embed_from_tfrecord(args.datafile, args.model, args.load_from)
     else:
         raise Exception('Unsupported file type - only .fasta and .tfrecord supported')
+    with open('outputs.pkl', 'wb') as f:
+        pkl.dump(embeddings, f)
 
 
 if __name__ == '__main__':
