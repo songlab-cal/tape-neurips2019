@@ -10,6 +10,7 @@ from Bio import SeqIO
 from tape.data_utils.vocabs import PFAM_VOCAB
 from tape.data_utils.serialize_fasta import deserialize_fasta_sequence
 from tape.models import ModelBuilder
+from tape.tasks import TaskBuilder
 
 
 def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
@@ -34,7 +35,10 @@ def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
     return embeddings
 
 
-def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VOCAB):
+def embed_from_tfrecord(tfrecord_file,
+                        model: str,
+                        load_from=None,
+                        deserialization_func=deserialize_fasta_sequence):
     sess = tf.Session()
     embedding_model = ModelBuilder.build_model(model)
 
@@ -46,7 +50,7 @@ def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VO
     if load_from is not None:
         embedding_model.load_weights(load_from)
 
-    data = tf.data.TFRecordDataset(tfrecord_file).map(deserialize_fasta_sequence)
+    data = tf.data.TFRecordDataset(tfrecord_file).map(deserialization_func)
     data = data.batch(1)
     iterator = data.make_one_shot_iterator()
     batch = iterator.get_next()
@@ -64,12 +68,20 @@ def main():
     parser.add_argument('datafile')
     parser.add_argument('--model', default=None)
     parser.add_argument('--load-from', default=None)
+    parser.add_argument('--task', default=None, help='If running a forward pass through existing task datasets, refer to the task with this flag')
     args = parser.parse_args()
+
+    if args.task is not None:
+        task = TaskBuilder.build_task(args.task)
+        deserialization_func = task._deserialization_func
+    else:
+        deserialization_func = deserialize_fasta_sequence
+
 
     if args.datafile.endswith('.fasta'):
         embeddings = embed_from_fasta(args.datafile, args.model, args.load_from)
     elif args.datafile.endswith('.tfrecord'):
-        embeddings = embed_from_tfrecord(args.datafile, args.model, args.load_from)
+        embeddings = embed_from_tfrecord(args.datafile, args.model, args.load_from, deserialization_func)
     else:
         raise Exception('Unsupported file type - only .fasta and .tfrecord supported')
 
