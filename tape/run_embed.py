@@ -26,8 +26,10 @@ def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
 
     embeddings = []
     for record in SeqIO.parse(fasta_file, 'fasta'):
-        int_sequence = np.array([vocab[aa] for aa in record.seq])
-        encoder_output = sess.run(output['encoder_output'], feed_dict={primary: int_sequence[None], protein_length: int_sequence.shape[1:]})
+        int_sequence = np.array([vocab[aa] for aa in record.seq], ndmin=2)
+        encoder_output = sess.run(output['encoder_output'],
+                                  feed_dict={primary: int_sequence,
+                                             protein_length: [int_sequence.shape[1]]})
         embeddings.append(encoder_output)
     return embeddings
 
