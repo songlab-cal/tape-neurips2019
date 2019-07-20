@@ -114,7 +114,13 @@ The available models and tasks can be found in `tape/models/ModelBuilder.py` and
 
 ### Extracting Embeddings
 
-If you would just like the embeddings for a list of proteins, first convert your fasta to tfrecords
+If you would just like the embeddings for a list of proteins,
+
+```bash
+$ tape-embed <filename>.fasta --model <model> --load-from <pretrained-weights>.h5
+```
+
+You can also go from tfrecords, by first converting your fasta to tfrecords
 
 ```bash
 $ tape-serialize <filename>.fasta
@@ -123,10 +129,10 @@ $ tape-serialize <filename>.fasta
 This will create a new serialized file in the same directory `<filename>.tfrecord`. You can then extract the embeddings with
 
 ```bash
-$ tape-embed --datafile <filename>.tfrecord --model <model> --load-from <pretrained-weights>.h5
+$ tape-embed <filename>.tfrecord --model <model> --load-from <pretrained-weights>.h5
 ```
 
-Which will create a file `outputs.pkl` in your current directory with the embeddings. This file has a dictionary with keys `['encoder_output', 'id', 'protein_length', 'primary']`, each mapping to a list of the corresponding results for each input protein. `outputs['encoder_output'][i]` is an `L_i x d` 2D array corresponding to the `d`-dimensional embedding of each residue in a protein `i` of length `L_i`. `id` is the string description of the sequence (from the fasta file). `primary` is the length `L_i` vector of integer amino-acid codes for the sequence. You can decode these back to 1 letter string codes using `from tape.data_utils.vocabs import PFAM_VOCAB`.
+Which will create a file `outputs.pkl` in your current directory with the list of embeddings.
 
 ## Extending Tape
 
