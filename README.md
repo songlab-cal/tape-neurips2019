@@ -62,7 +62,7 @@ $ pip install -e .
 
 `tape` uses [Sacred](https://sacred.readthedocs.io/en/latest/index.html) to configure and store logging information.
 
-Sacred options are specified by running `python -m tape with <args>`. For example, to run the `transformer` model on the `masked_language_modeling` task, simply run
+Sacred options are specified by running `tape with <args>`. For example, to run the `transformer` model on the `masked_language_modeling` task, simply run
 
 ```bash
 $ tape with model=transformer tasks=masked_language_modeling
@@ -70,6 +70,24 @@ $ tape with model=transformer tasks=masked_language_modeling
 Additional arguments can be specified by adding e.g. `transformer.n_layers=6`, `training.learning_rate=1e-4`, `gpu.device=0,1,2`, etc.
 
 Global arguments are defined under `@tape.config` in `tape/__main__.py`. Model specific arguments (e.g. `transformer.n_layers`) can be found in the corresponding model file (`tape/models/Transformer.py`).
+
+### Loading a Model
+
+There are two ways of loading a model, depending on whether you want to load the unsupervised pre-training weights or the supervised task-specific weights. Loading unsupervised weights is done by passing the argument `load_from=</path/to/unsupervised_weights.h5>`. Loading supervised weights is done by passing the argument `load_task_from=</path/to/supervised_weights.h5>`.
+
+### Saving Results
+
+Results will be stored in `results/`. Each run will be placed in a timestamped directory. All `tape` sources will automatically be saved, along with the config and per-epoch metrics.
+
+### Running the trained Task Model
+
+Once you've trained your task model, you can run an evaluation step like this, passing your test set (as tfrecords) to `--datafile`:
+
+```bash
+$ tape-eval results/<task-name>-<model>-<time-stamp>/ --datafile data/remote_homology/remote_homology_test_fold_holdout.tfrecord
+```
+
+This will report the key accuracy metric on your dataset, as well as save the outputs of the model to `results/<task-name>-<model>-<time-stamp>/outputs.pkl` for more detailed analysis
 
 ### List of Models and Tasks
 
@@ -102,13 +120,27 @@ Finally we also provide the `netsurf` task, which does the full multi-task Netsu
 
 The available models and tasks can be found in `tape/models/ModelBuilder.py` and `tape/tasks/TaskBuilder.py`.
 
-### Loading a Model
+### Extracting Embeddings
 
-There are two ways of loading a model, depending on whether you want to load the unsupervised pre-training weights or the supervised task-specific weights. Loading unsupervised weights is done by passing the argument `load_from=</path/to/unsupervised_weights.h5>`. Loading supervised weights is done by passing the argument `load_task_from=</path/to/supervised_weights.h5>`.
+If you would just like the embeddings for a list of proteins,
 
-### Saving Results
+```bash
+$ tape-embed <filename>.fasta --model <model> --load-from <pretrained-weights>.h5
+```
 
-Results will be stored in `tape/results`. Each run will be placed in a timestamped directory. All `tape` sources will automatically be saved, along with the config and per-epoch metrics.
+You can also go from tfrecords, by first converting your fasta to tfrecords
+
+```bash
+$ tape-serialize <filename>.fasta
+```
+
+This will create a new serialized file in the same directory `<filename>.tfrecord`. You can then extract the embeddings with
+
+```bash
+$ tape-embed <filename>.tfrecord --model <model> --load-from <pretrained-weights>.h5
+```
+
+Which will create a file `outputs.pkl` in your current directory with the list of embeddings.
 
 ## Extending Tape
 
