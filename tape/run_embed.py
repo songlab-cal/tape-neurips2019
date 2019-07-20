@@ -19,8 +19,10 @@ def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
     protein_length = tf.placeholder(tf.int32, [None])
     output = embedding_model({'primary': primary, 'protein_length': protein_length})
 
+    sess.run(tf.global_variables_initializer())
     if load_from is not None:
         embedding_model.load_weights(load_from)
+
 
     embeddings = []
     for record in SeqIO.parse(fasta_file, 'fasta'):
@@ -38,6 +40,7 @@ def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VO
     protein_length = tf.placeholder(tf.int32, [None])
     output = embedding_model({'primary': primary, 'protein_length': protein_length})
 
+    sess.run(tf.global_variables_initializer())
     if load_from is not None:
         embedding_model.load_weights(load_from)
 
@@ -56,7 +59,7 @@ def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VO
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('datafile')
-    parser.add_argument('--model', default='')
+    parser.add_argument('--model', default=None)
     parser.add_argument('--load-from', default=None)
     args = parser.parse_args()
 
