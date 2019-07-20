@@ -38,6 +38,7 @@ def embed_from_fasta(fasta_file, model: str, load_from=None, vocab=PFAM_VOCAB):
 def embed_from_tfrecord(tfrecord_file,
                         model: str,
                         load_from=None,
+                        batch_size=1,
                         deserialization_func=deserialize_fasta_sequence):
     sess = tf.Session()
     embedding_model = ModelBuilder.build_model(model)
@@ -51,15 +52,16 @@ def embed_from_tfrecord(tfrecord_file,
         embedding_model.load_weights(load_from)
 
     data = tf.data.TFRecordDataset(tfrecord_file).map(deserialization_func)
-    data = data.batch(1)
+    data = data.batch(batch_size)
     iterator = data.make_one_shot_iterator()
     batch = iterator.get_next()
     output = embedding_model(batch)
     embeddings = []
     with suppress(tf.errors.OutOfRangeError):
         while True:
-            encoder_output = sess.run(output['encoder_output'])
-            embeddings.append(encoder_output)
+            encoder_output_batch = sess.run(output['encoder_output'])
+            for encoder_output in encoder_output_batch:
+                embeddings.append(encoder_output)
     return embeddings
 
 
@@ -68,6 +70,7 @@ def main():
     parser.add_argument('datafile')
     parser.add_argument('--model', default=None)
     parser.add_argument('--load-from', default=None)
+    parser.add_argument('--batch-size', default=1, type=int, help='Only for tfrecords')
     parser.add_argument('--task', default=None, help='If running a forward pass through existing task datasets, refer to the task with this flag')
     args = parser.parse_args()
 
@@ -81,7 +84,11 @@ def main():
     if args.datafile.endswith('.fasta'):
         embeddings = embed_from_fasta(args.datafile, args.model, args.load_from)
     elif args.datafile.endswith('.tfrecord'):
-        embeddings = embed_from_tfrecord(args.datafile, args.model, args.load_from, deserialization_func)
+        embeddings = embed_from_tfrecord(args.datafile,
+                                         args.model,
+                                         args.load_from,
+                                         args.batch_size,
+                                         deserialization_func)
     else:
         raise Exception('Unsupported file type - only .fasta and .tfrecord supported')
 
