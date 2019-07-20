@@ -47,6 +47,7 @@ def embed_from_tfrecord(tfrecord_file, model: str, load_from=None, vocab=PFAM_VO
         embedding_model.load_weights(load_from)
 
     data = tf.data.TFRecordDataset(tfrecord_file).map(deserialize_fasta_sequence)
+    data = data.batch(1)
     iterator = data.make_one_shot_iterator()
     batch = iterator.get_next()
     output = embedding_model(batch)
@@ -71,6 +72,7 @@ def main():
         embeddings = embed_from_tfrecord(args.datafile, args.model, args.load_from)
     else:
         raise Exception('Unsupported file type - only .fasta and .tfrecord supported')
+
     with open('outputs.pkl', 'wb') as f:
         pkl.dump(embeddings, f)
 
