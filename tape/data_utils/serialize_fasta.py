@@ -31,7 +31,8 @@ def fasta_to_tfrecord(filename, vocab=PFAM_VOCAB):
     print('Writing tfrecord file {}'.format(new_filename))
 
     with tf.python_io.TFRecordWriter(new_filename) as writer:
-        writer.write(example.SerializeToString())
+        for example in proteins_to_embed:
+            writer.write(example.SerializeToString())
 
 
 def deserialize_fasta_sequence(example):
