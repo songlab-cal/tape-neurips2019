@@ -87,7 +87,7 @@ class Transformer(AbstractTapeModel):
     def get_optimal_batch_sizes(self) -> Tuple[List[int], List[int]]:
         bucket_sizes = np.array(
             [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
-             1100, 1200, 1300, 1400, 1500, 1600, 1700, 18000, 2000])
+             1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 2000])
         batch_sizes = np.array(
             [4, 3, 2, 1.5, 1, 0.9, 0.9, 0.8, 0.65, 0.6,
              0.5, 0.5, 0.4, 0.3, 0.3, 0.2, 0.2, 0.1, 0, 0])
