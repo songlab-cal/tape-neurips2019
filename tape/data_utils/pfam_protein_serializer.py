@@ -84,7 +84,7 @@ def convert_pfam_sequences_to_tfrecords(filename: str,
     random.shuffle(all_examples)
 
     print("Writing holdout")
-    with tf.python_io.TFRecordWriter(outfile + '_holdout' + '.tfrecords') as writer:
+    with tf.python_io.TFRecordWriter(outfile + '_holdout' + '.tfrecord') as writer:
         for seq, family, clan in holdout_examples:
             serialized_example = serialize_pfam_sequence(seq, family, clan, vocab, fam_dict, clan_dict)
             writer.write(serialized_example)
@@ -96,7 +96,7 @@ def convert_pfam_sequences_to_tfrecords(filename: str,
 
     print("Writing training set")
     for i in range(num_files):
-        filename = outfile + '_' + str(i) + '.tfrecords'
+        filename = outfile + '_' + str(i) + '.tfrecord'
         with tf.python_io.TFRecordWriter(filename) as writer:
             for serialized_example in serialized_examples[i::num_files]:
                 writer.write(serialized_example)
