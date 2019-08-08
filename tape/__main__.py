@@ -5,7 +5,9 @@ import atexit
 import os
 import shutil
 import pickle as pkl
+import uuid
 
+import h5py
 import tensorflow as tf
 
 from tape.tasks import TaskBuilder, Task, AbstractLanguageModelingTask
@@ -207,31 +209,33 @@ def cleanup_folders(outdir: str, model, tasks, debug):
 
 
 def consolidate_data(outfile, include_hidden: bool = False):
+    """
+    Turn batched h5 output file into flat h5 file
+    """
 
-    with open(outfile, 'rb') as f:
-        outputs = pkl.load(f)
+    tmp_id = uuid.uuid1().hex  # just in case there's some weirdness
+    tmp_filename = 'outputs_tmp_{}.h5'.format(tmp_id)
+    i = 0
+    with h5py.File(outfile, 'r') as f,  h5py.File(tmp_filename, 'w') as f_out:
+        for key in f.keys():  # iterate over all batches
+            output = f[key]
+            length = output['protein_length'][()]
+            for key, protein_batch in output.items():
+                protein_batch = protein_batch[()]
+                # iterate over all proteins in the batch
+                for protein_length, protein_data in zip(length, protein_batch):
+                    grp = f_out.create_group(str(i))
+                    if np.isscalar(protein_data):
+                        grp.create_dataset(key, data=protein_data)
+                    elif protein_data.ndim == 1 and protein_data.dtype in [np.float32, np.float64]:
+                        grp.create_dataset(key, data=protein_data)
+                    else:
+                        # truncate by length of the sequence to remove padding
+                        grp.create_dataset(key, data=protein_data[:protein_length])
+                    i += 1
 
-    data = defaultdict(list)  # type: ignore
-
-    for output in outputs:
-        output = output[0]
-        length = output['protein_length']
-        for key, protein_batch in output.items():
-            for protein_length, protein_data in zip(length, protein_batch):
-                if np.isscalar(protein_data):
-                    data[key].append(protein_data)
-                elif protein_data.ndim == 1 and protein_data.dtype in [np.float32, np.float64]:
-                    data[key].append(protein_data)
-                else:
-                    data[key].append(protein_data[:protein_length])
-
-    data = dict(data)
-
-    if not include_hidden:
-        del data['encoder_output']
-
-    with open(outfile, 'wb') as f:
-        pkl.dump(data, f)
+    # be careful, this could take up many GB of disk space! (especially for the LSTM)
+    os.replace(tmp_filename, outfile)
 
 
 @proteins.command
@@ -270,7 +274,7 @@ def eval(_run, _config, tasks: Union[str, List[str]], model: str):
         experiment.distribution_strategy, task_model, _config['load_task_from'])
 
     task_dir = os.path.dirname(_config['load_task_from'])
-    outfile = os.path.join(task_dir, 'outputs.pkl')
+    outfile = os.path.join(task_dir, 'outputs.h5')
     print('Saving outputs to {}'.format(outfile))
     test_metrics = test_graph.run_epoch(save_outputs=outfile)
     print(test_metrics.get_average())

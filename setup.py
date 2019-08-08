@@ -20,7 +20,7 @@ setup(
     install_requires=[
         'tensorflow-gpu<1.14.0',  # https://github.com/IDSIA/sacred/issues/493
         'numpy',
-        'rinokeras==1.1.1',
+        'rinokeras==1.1.2',
         'biopython',
         'sacred',
         'table_logger',
