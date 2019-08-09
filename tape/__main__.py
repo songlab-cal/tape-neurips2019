@@ -220,11 +220,15 @@ def consolidate_data(outfile, include_hidden: bool = False):
         for key in f.keys():  # iterate over all batches
             output = f[key]
             length = output['protein_length'][()]
+            n_seqs = len(length)
             for key, protein_batch in output.items():
                 protein_batch = protein_batch[()]
                 # iterate over all proteins in the batch
-                for protein_length, protein_data in zip(length, protein_batch):
-                    grp = f_out.create_group(str(i))
+                for index, protein_length, protein_data in zip(range(i, i+n_seqs), length, protein_batch):
+                    try:
+                        grp = f_out[str(index)]
+                    except KeyError:
+                        grp = f_out.create_group(str(index))
                     if np.isscalar(protein_data):
                         grp.create_dataset(key, data=protein_data)
                     elif protein_data.ndim == 1 and protein_data.dtype in [np.float32, np.float64]:
@@ -232,7 +236,7 @@ def consolidate_data(outfile, include_hidden: bool = False):
                     else:
                         # truncate by length of the sequence to remove padding
                         grp.create_dataset(key, data=protein_data[:protein_length])
-                    i += 1
+            i += n_seqs
 
     # be careful, this could take up many GB of disk space! (especially for the LSTM)
     os.replace(tmp_filename, outfile)
@@ -276,7 +280,7 @@ def eval(_run, _config, tasks: Union[str, List[str]], model: str):
     task_dir = os.path.dirname(_config['load_task_from'])
     outfile = os.path.join(task_dir, 'outputs.h5')
     print('Saving outputs to {}'.format(outfile))
-    test_metrics = test_graph.run_epoch(save_outputs=outfile)
+    test_metrics = test_graph.run_epoch(save_outputs=outfile, save_format='h5')
     print(test_metrics.get_average())
     consolidate_data(outfile, include_hidden=True)
 
