@@ -116,6 +116,10 @@ class Task(ABC):
     def key_metric(self) -> str:
         return self._key_metric
 
+    @property
+    def deserialization_func(self) -> Callable:
+        return self._deserialization_func
+
 
 class SequenceToSequenceClassificationTask(Task):
 

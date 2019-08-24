@@ -6,5 +6,6 @@ from .pfam_protein_serializer import deserialize_pfam_sequence  # noqa: F401
 from .proteinnet_serializer import deserialize_proteinnet_sequence  # noqa: F401
 from .remote_homology_serializer import deserialize_remote_homology_sequence  # noqa: F401
 from .secondary_structure_protein_serializer import deserialize_secondary_structure  # noqa: F401
+from .serialize_fasta import deserialize_fasta_sequence  # noqa: F401
 from .stability_serializer import deserialize_stability_sequence  # noqa: F401
 from .vocabs import PFAM_VOCAB  # noqa: F401

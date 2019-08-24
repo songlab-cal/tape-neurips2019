@@ -1,98 +1,96 @@
-import argparse
-from contextlib import suppress
-import pickle as pkl
-
-import tensorflow as tf
-import numpy as np
-
-from Bio import SeqIO
-
-from tape.data_utils.vocabs import PFAM_VOCAB
-from tape.data_utils.serialize_fasta import deserialize_fasta_sequence
-from tape.models import ModelBuilder
-from tape.tasks import TaskBuilder
+from typing import Optional
+from pathlib import Path
 
 
-def embed_from_fasta(fasta_file,
-                     model: str,
-                     load_from=None,
-                     vocab=PFAM_VOCAB):
-    sess = tf.Session()
-    embedding_model = ModelBuilder.build_model(model)
+def run_embed(datafile: str,
+              model_name: str,
+              load_from: Optional[str] = None,
+              task_name: Optional[str] = None):
 
-    primary = tf.placeholder(tf.int32, [None, None])
-    protein_length = tf.placeholder(tf.int32, [None])
-    output = embedding_model({'primary': primary, 'protein_length': protein_length})
+    datapath = Path(datafile)
+    if not datapath.exists():
+        raise FileNotFoundError(datapath)
+    elif datapath.suffix not in ['.fasta', '.tfrecord', '.tfrecords']:
+        raise Exception(f"Unknown file type: {datapath.suffix}, must be .fasta or .tfrecord")
 
-    sess.run(tf.global_variables_initializer())
+    load_path: Optional[Path] = None
     if load_from is not None:
-        embedding_model.load_weights(load_from, by_name=True)
+        load_path = Path(load_from)
+        if not load_path.exists():
+            raise FileNotFoundError(load_path)
 
-    embeddings = []
-    for record in SeqIO.parse(fasta_file, 'fasta'):
-        int_sequence = np.array([vocab[aa] for aa in record.seq], ndmin=2)
-        encoder_output = sess.run(output['encoder_output'],
-                                  feed_dict={primary: int_sequence,
-                                             protein_length: [int_sequence.shape[1]]})
-        embeddings.append(encoder_output)
-    return embeddings
+    import tensorflow as tf
+    import tensorflow.keras.backend as K
+    import numpy as np
 
+    from tape.models import ModelBuilder
 
-def embed_from_tfrecord(tfrecord_file,
-                        model: str,
-                        load_from=None,
-                        deserialization_func=deserialize_fasta_sequence):
-    sess = tf.Session()
-    embedding_model = ModelBuilder.build_model(model)
+    sess = tf.InteractiveSession()
+    K.set_learning_phase(0)
+    embedding_model = ModelBuilder.build_model(model_name)
 
-    primary = tf.placeholder(tf.int32, [None, None])
-    protein_length = tf.placeholder(tf.int32, [None])
-    output = embedding_model({'primary': primary, 'protein_length': protein_length})
+    if datapath.suffix == '.fasta':
+        from Bio import SeqIO
+        from tape.data_utils import PFAM_VOCAB
+        primary = tf.placeholder(tf.int32, [None, None])
+        protein_length = tf.placeholder(tf.int32, [None])
+        output = embedding_model({'primary': primary, 'protein_length': protein_length})
+        sess.run(tf.global_variables_initializer())
+        if load_path is not None:
+            embedding_model.load_weights(str(load_path))
 
-    sess.run(tf.global_variables_initializer())
-    if load_from is not None:
-        embedding_model.load_weights(load_from, by_name=True)
+        embeddings = []
+        for record in SeqIO.parse(str(datapath), 'fasta'):
+            int_sequence = np.array([PFAM_VOCAB[aa] for aa in record.seq], ndmin=2)
+            encoder_output = sess.run(output['encoder_output'],
+                                      feed_dict={primary: int_sequence,
+                                                 protein_length: [int_sequence.shape[1]]})
+            embeddings.append(encoder_output)
+    else:
+        import contextlib
+        if task_name is not None:
+            from tape.tasks import TaskBuilder
+            task = TaskBuilder.build_task(task_name)
+            deserialization_func = task.deserialization_func
+        else:
+            from tape.data_utils import deserialize_fasta_sequence
+            deserialization_func = deserialize_fasta_sequence
 
-    data = tf.data.TFRecordDataset(tfrecord_file).map(deserialization_func)
-    data = data.batch(1)
-    iterator = data.make_one_shot_iterator()
-    batch = iterator.get_next()
-    output = embedding_model(batch)
-    embeddings = []
-    with suppress(tf.errors.OutOfRangeError):
-        while True:
-            encoder_output_batch = sess.run(output['encoder_output'])
-            for encoder_output in encoder_output_batch:
-                embeddings.append(encoder_output)
+        data = tf.data.TFRecordDataset(datapath).map(deserialization_func)
+        data = data.batch(1)
+        iterator = data.make_one_shot_iterator()
+        batch = iterator.get_next()
+        output = embedding_model(batch)
+        if load_path is not None:
+            embedding_model.load_weights(str(load_path))
+
+        embeddings = []
+        with contextlib.suppress(tf.errors.OutOfRangeError):
+            while True:
+                output_batch = sess.run(output['encoder_output'])
+                for encoder_output in output_batch:
+                    embeddings.append(encoder_output)
+
     return embeddings
 
 
 def main():
+    import argparse
+    import pickle as pkl
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('datafile')
-    parser.add_argument('--model', default=None)
-    parser.add_argument('--load-from', default=None)
-    parser.add_argument('--task', default=None, help='If running a forward pass through existing task datasets, refer to the task with this flag')
+    parser.add_argument('datafile', type=str, help='sequences to embed')
+    parser.add_argument('model', type=str, help='which model to use')
+    parser.add_argument('--load-from', type=str, default=None, help='file from which to load pretrained weights')
+    parser.add_argument(
+        '--task', default=None,
+        help='If running a forward pass through existing task datasets, refer to the task with this flag')
+    parser.add_argument('--output', default='outputs.pkl', type=str, help='file to output results to')
     args = parser.parse_args()
 
-    if args.task is not None:
-        task = TaskBuilder.build_task(args.task)
-        deserialization_func = task._deserialization_func
-    else:
-        deserialization_func = deserialize_fasta_sequence
+    embeddings = run_embed(args.datafile, args.model, args.load_from, args.task)
 
-
-    if args.datafile.endswith('.fasta'):
-        embeddings = embed_from_fasta(args.datafile, args.model, args.load_from)
-    elif args.datafile.endswith('.tfrecord'):
-        embeddings = embed_from_tfrecord(args.datafile,
-                                         args.model,
-                                         args.load_from,
-                                         deserialization_func=deserialization_func)
-    else:
-        raise Exception('Unsupported file type - only .fasta and .tfrecord supported')
-
-    with open('outputs.pkl', 'wb') as f:
+    with open(args.output, 'wb') as f:
         pkl.dump(embeddings, f)
 
 
