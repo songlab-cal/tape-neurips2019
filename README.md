@@ -285,6 +285,17 @@ year = {2018}
 }
 ```
 
+__NetSurfP2.0: (Secondary Structure)__
+```
+@article{netsurfp,
+  title={NetSurfP-2.0: Improved prediction of protein structural features by integrated deep learning},
+  author={Klausen, Michael Schantz and Jespersen, Martin Closter and Nielsen, Henrik and Jensen, Kamilla Kjaergaard and Jurtz, Vanessa Isabell and Soenderby, Casper Kaae and Sommer, Morten Otto Alexander and Winther, Ole and Nielsen, Morten and Petersen, Bent and others},
+  journal={Proteins: Structure, Function, and Bioinformatics},
+  year={2019},
+  publisher={Wiley Online Library}
+}
+```
+
 __ProteinNet: (Contact)__
 ```
 @article{

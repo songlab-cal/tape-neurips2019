@@ -142,29 +142,12 @@ class AbstractLanguageModelingTask(SequenceToSequenceClassificationTask):
         if not all(map(os.path.exists, datafile)):
             raise FileNotFoundError(datafile)
 
-        is_holdout = any(map(lambda fname: 'valid' in fname, datafile))
-
-        fam_file = 'data/pfam/pfam_fams.pkl'
-        clan_file = 'data/pfam/pfam_clans.pkl'
-
-        _holdout_clans = ['CL0635', 'CL0624', 'CL0355', 'CL0100', 'CL0417', 'CL0630']
-        _holdout_families = ['PF18346', 'PF14604', 'PF18697', 'PF03577', 'PF01112', 'PF03417']
-
-        with open(fam_file, 'rb') as f:
-            fam_dict: Dict[str, int] = pkl.load(f)
-
-        with open(clan_file, 'rb') as f:
-            clan_dict: Dict[str, int] = pkl.load(f)
-
-        holdout_clans = {clan_dict[k] for k in _holdout_clans}
-        holdout_families = {fam_dict[k] for k in _holdout_families}
-
         buckets, batch_sizes = boundaries
 
         filenames = tf.data.Dataset.from_tensor_slices(tf.constant(datafile))
 
         test_data = self.prepare_dataset(
-            filenames, buckets, batch_sizes, shuffle=False, is_holdout=is_holdout,
-            holdout_clans=holdout_clans, holdout_families=holdout_families)
+            filenames, buckets, batch_sizes, shuffle=False, is_holdout=False,
+            holdout_clans=set(), holdout_families=set())
 
         return test_data

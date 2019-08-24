@@ -68,14 +68,17 @@ def convert_pfam_sequences_to_tfrecords(filename: str,
     print("Forming Train Set")
 
     all_examples = []
-    holdout_examples = []
+    holdout_clan_examples = []
+    holdout_families_examples = []
     holdout_clans = ['CL0635', 'CL0624', 'CL0355', 'CL0100', 'CL0417', 'CL0630']
     holdout_families = ['PF18346', 'PF14604', 'PF18697', 'PF03577', 'PF01112', 'PF03417']
 
     for record in tqdm(SeqIO.parse(filename, 'fasta'), total=34353433):
         seq, family, clan = parse_line(record, fam_to_clan_dict)
-        if clan in holdout_clans or family in holdout_families:
-            holdout_examples.append((seq, family, clan))
+        if clan in holdout_clans:
+            holdout_clan_examples.append((seq, family, clan))
+        elif family in holdout_families:
+            holdout_families_examples.append((seq, family, clan))
         else:
             all_examples.append((seq, family, clan))
 
@@ -83,9 +86,15 @@ def convert_pfam_sequences_to_tfrecords(filename: str,
     random.seed(seed)
     random.shuffle(all_examples)
 
-    print("Writing holdout")
-    with tf.python_io.TFRecordWriter(outfile + '_holdout' + '.tfrecord') as writer:
-        for seq, family, clan in holdout_examples:
+    print("Writing clan holdout")
+    with tf.python_io.TFRecordWriter(outfile + '_holdout_clans' + '.tfrecord') as writer:
+        for seq, family, clan in holdout_clan_examples:
+            serialized_example = serialize_pfam_sequence(seq, family, clan, vocab, fam_dict, clan_dict)
+            writer.write(serialized_example)
+
+    print("Writing family holdout")
+    with tf.python_io.TFRecordWriter(outfile + '_holdout_fams' + '.tfrecord') as writer:
+        for seq, family, clan in holdout_families_examples:
             serialized_example = serialize_pfam_sequence(seq, family, clan, vocab, fam_dict, clan_dict)
             writer.write(serialized_example)
 
@@ -95,8 +104,14 @@ def convert_pfam_sequences_to_tfrecords(filename: str,
         serialized_examples = p.starmap(serialize_map_fn, all_examples)
 
     print("Writing training set")
-    for i in range(num_files):
-        filename = outfile + '_' + str(i) + '.tfrecord'
+    for i in range(num_files - 3):
+        filename = outfile + '_train_' + str(i) + '.tfrecord'
+        with tf.python_io.TFRecordWriter(filename) as writer:
+            for serialized_example in serialized_examples[i::num_files]:
+                writer.write(serialized_example)
+
+    for i in range(num_files - 3, num_files):
+        filename = outfile + '_valid_' + str(i) + '.tfrecord'
         with tf.python_io.TFRecordWriter(filename) as writer:
             for serialized_example in serialized_examples[i::num_files]:
                 writer.write(serialized_example)
@@ -177,8 +192,8 @@ if __name__ == '__main__':
                                         vocab=PFAM_VOCAB)
 
 # python -m tape.data_utils.pfam_protein_serializer \
-#     data/pfam/Pfam-A.fasta \
-#     --outfile data/pfam_reserialize/pfam31 \
-#     --fam-to-clan-file data/pfam/Pfam-A.clans.tsv \
-#     --fampkl data/pkls/pfam_fams_public.pkl \
-#     --clanpkl data/pkls/pfam_clans_public.pkl
+#     data/pfam_old/Pfam-A.fasta \
+#     --outfile data/split_holdout/pfam31 \
+#     --fam-to-clan-file data/pfam_old/Pfam-A.clans.tsv \
+#     --fampkl data/pfam/pfam_fams.pkl \
+#     --clanpkl data/pfam/pfam_clans.pkl
