@@ -56,7 +56,7 @@ def run_embed(datafile: str,
             from tape.data_utils import deserialize_fasta_sequence
             deserialization_func = deserialize_fasta_sequence
 
-        data = tf.data.TFRecordDataset(datapath).map(deserialization_func)
+        data = tf.data.TFRecordDataset(str(datapath)).map(deserialization_func)
         data = data.batch(1)
         iterator = data.make_one_shot_iterator()
         batch = iterator.get_next()
