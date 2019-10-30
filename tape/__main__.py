@@ -28,9 +28,9 @@ proteins = Experiment('Unsupervised Protein',
 
 folder_name = datetime.now().strftime("%Y-%m-%d--%H-%M-%S")
 logdir = os.environ.get('PROTEIN_LOGDIR', 'results')
-if not os.path.isdir('results'):
-    os.mkdir('results')
-proteins.observers.append(FileStorageObserver.create(os.path.join('results', folder_name)))
+if not os.path.isdir(logdir):
+    os.mkdir(logdir)
+proteins.observers.append(FileStorageObserver.create(os.path.join(logdir, folder_name)))
 
 
 def filter_text(text):
