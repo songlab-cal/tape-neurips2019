@@ -1,3 +1,4 @@
+# Letter codes standard for IUPAC. See here: https://www.bioinformatics.org/sms2/iupac.html
 PFAM_VOCAB = {
     '<PAD>': 0,
     '<MASK>': 1,
