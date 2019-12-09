@@ -1,5 +1,7 @@
 # Tasks Assessing Protein Embeddings (TAPE)
 
+___Note: This is the code associated with our original paper and benchmark. To view our new pytorch code, see [https://github.com/songlab-cal/tape](https://github.com/songlab-cal/tape).___
+
 Data, weights, and code for running the TAPE benchmark on a trained protein embedding. We provide a pretraining corpus, five supervised downstream tasks, pretrained language model weights, and benchmarking code.
 
 ## Contents
