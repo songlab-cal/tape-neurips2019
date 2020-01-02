@@ -237,7 +237,7 @@ class BeplerModel(AbstractTapeModel):
             new_seq = np.zeros_like(seq)
 
             for pfam_encoding, uniprot_encoding in PFAM_TO_BEPLER_ENCODED.items():
-                new_seq[seq == pfam_encoding] = uniprot_encoding
+                new_seq[np.where([element == pfam_encoding for element in seq])] = uniprot_encoding
 
             return new_seq
 
